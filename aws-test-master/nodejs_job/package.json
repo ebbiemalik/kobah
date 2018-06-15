@@ -1,0 +1,22 @@
+{
+  "name": "nodejs_job",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node loader.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "csvtojson": "^1.1.9",
+    "fs": "0.0.1-security",
+    "ftp": "^0.3.10",
+    "mongoose": "^5.0.16",
+    "node-cron": "^1.2.1",
+    "thorden": "^1.0.6"
+  }
+}

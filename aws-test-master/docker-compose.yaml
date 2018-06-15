@@ -1,0 +1,83 @@
+version: "3"
+networks:
+  albums:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "false"
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.238.0/24
+      - subnet: 2001:3984:3989::/64
+
+services:
+  data_base_service:
+    image: iownit/aws-test:data_base_service
+    build:
+      context: ./database_service
+      dockerfile: Dockerfile
+    networks:
+      albums:
+        ipv4_address: 172.16.238.12
+        ipv6_address: 2001:3984:3989::10
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=get65478hk65241
+      - MONGODB_APP_DB=albums
+      - MONGODB_APP_USER=ualb4513
+      - MONGODB_APP_PASS=f864cfd548hnbfet421
+    volumes:
+      - ./database_service/mongo-entrypoint/:/docker-entrypoint-initdb.d/
+
+  ftp_service:
+    image: iownit/aws-test:ftp_service
+    build:
+      context: ./ftp_service
+      dockerfile: Dockerfile
+    environment:
+      - FTP_USER=ualb_ftp
+      - FTP_PASS=Hgfgfju8435Hj10
+      - CSV_FILE=albums.csv
+    networks:
+      albums:
+        ipv4_address: 172.16.238.10
+        ipv6_address: 2001:3984:3989::10
+
+  nodejs_job:
+    image: iownit/aws-test:nodejs_job
+    build:
+      context: ./nodejs_job
+      dockerfile: Dockerfile
+    networks:
+      albums:
+        ipv4_address: 172.16.238.11
+        ipv6_address: 2001:3984:3989::10
+    depends_on:
+      - data_base_service
+      - ftp_service
+    environment:
+      - MONGO_URI=mongodb://ualb4513:f864cfd548hnbfet421@172.16.238.12/albums
+      - FTP_HOST=172.16.238.10
+      - FTP_USER=ualb_ftp
+      - FTP_PASS=Hgfgfju8435Hj10
+      - FTP_PORT=21
+      - FTP_CSV_FILE=albums.csv
+
+  nodejs_service:
+    image: iownit/aws-test:nodejs_service
+    build:
+      context: ./nodejs_service
+      dockerfile: Dockerfile
+    networks:
+      albums:
+        ipv4_address: 172.16.238.14
+        ipv6_address: 2001:3984:3989::10
+    depends_on:
+      - data_base_service
+      - ftp_service
+      - nodejs_job
+    environment:
+      #- NODE_ENV=production
+      - MONGO_URI=mongodb://ualb4513:f864cfd548hnbfet421@172.16.238.12/albums
+      - PORT=3000
